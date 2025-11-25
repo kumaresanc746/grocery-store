@@ -1,0 +1,75 @@
+---
+- name: Configure Kubernetes Deployment
+  hosts: all
+  become: yes
+  vars:
+    k8s_dir: /opt/k8s-deployments
+  tasks:
+    - name: Install kubectl
+      shell: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        mv kubectl /usr/local/bin/
+      args:
+        creates: /usr/local/bin/kubectl
+
+    - name: Install AWS CLI
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip -q awscliv2.zip
+        ./aws/install
+        rm -rf aws awscliv2.zip
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Create Kubernetes deployment directory
+      file:
+        path: "{{ k8s_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy Kubernetes YAML files
+      copy:
+        src: "{{ item }}"
+        dest: "{{ k8s_dir }}/"
+        mode: preserve
+      loop:
+        - "{{ playbook_dir }}/../k8s/*.yaml"
+        - "{{ playbook_dir }}/../k8s/*.yml"
+
+    - name: Configure kubectl for EKS cluster
+      shell: |
+        aws eks update-kubeconfig --name {{ eks_cluster_grocerystore }} --region {{ eu-north-1 }}
+      environment:
+        AWS_ACCESS_KEY_ID: "{{AKIAYLPEFOFMU3MXC6XY}}"
+        AWS_SECRET_ACCESS_KEY: "{{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}}"
+      when: eks_cluster_grocerystore is defined
+
+    - name: Apply Kubernetes manifests
+      shell: kubectl apply -f {{ k8s_dir }} --namespace {{ k8s_namespace | default('default') }}
+      environment:
+        AWS_ACCESS_KEY_ID: "{{AKIAYLPEFOFMU3MXC6XY}}"
+        AWS_SECRET_ACCESS_KEY: "{{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}}"
+      when: eks_cluster_grocerystore is defined
+
+    - name: Wait for deployments to be ready
+      shell: kubectl rollout status deployment/{{ item }} --namespace {{ k8s_namespace | default('default') }}
+      loop:
+        - backend-deployment
+        - frontend-deployment
+        - mongo-deployment
+      when: eks_cluster_grocerystore is defined
+      ignore_errors: yes
+
+    - name: Display deployment status
+      shell: kubectl get deployments --namespace {{ k8s_namespace | default('default') }}
+      register: deployment_status
+      changed_when: false
+      when: eks_cluster_grocerystore is defined
+
+    - name: Show deployment status
+      debug:
+        var: deployment_status.stdout_lines
+      when: eks_cluster_grocerystore is defined
+
+
