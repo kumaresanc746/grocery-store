@@ -73,7 +73,8 @@ services:
     networks:
       - grocery-network
     environment:
-      - API_BASE_URL=http://localhost:3000/api
+      - API_BASE_URL=http://grocery-backend:3000/api
+
 
 networks:
   grocery-network:
