@@ -1,100 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Grocery Store</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard - GroceryMart</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .container { max-width: 1000px; margin: 20px auto; padding: 10px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    h2 { margin: 0 0 8px 0; }
+    .list-item { border-bottom: 1px solid #eee; padding: 8px 0; }
+    .flex { display:flex; gap:8px; align-items:center; }
+    .btn { padding:6px 10px; border-radius:6px; cursor:pointer; }
+    .btn-primary { background:#007bff;color:#fff;border:none; }
+    .btn-danger { background:#dc3545;color:#fff;border:none; }
+    input, select, textarea { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; }
+    label { font-weight:600; font-size:0.9rem; }
+  </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-brand">
-                <h1>🛒 GroceryMart - Admin</h1>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="#" onclick="logoutAdmin()">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
-
+  <nav class="navbar">
     <div class="container">
-        <h1>Admin Dashboard</h1>
-        <div class="admin-actions">
-            <button class="btn-primary" onclick="showAddProductModal()">Add New Product</button>
-        </div>
+      <div class="nav-brand"><h1>🛒 GroceryMart - Admin</h1></div>
+      <ul class="nav-menu">
+        <li><a href="#" onclick="logoutAdmin()">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
 
-        <div class="products-table-container">
-            <table class="products-table">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-products-table">
-                    <!-- Products loaded via JavaScript -->
-                </tbody>
-            </table>
-        </div>
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2>Admin Dashboard</h2>
+      <button class="btn btn-primary" onclick="showAddForm()">Add New Product</button>
     </div>
 
-    <!-- Add/Edit Product Modal -->
-    <div id="product-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeProductModal()">&times;</span>
-            <h2 id="modal-title">Add Product</h2>
-            <form id="product-form">
-                <input type="hidden" id="product-id">
-                <div class="form-group">
-                    <label>Product Name</label>
-                    <input type="text" id="product-name" required>
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="product-category" required>
-                        <option value="fruits">Fruits</option>
-                        <option value="vegetables">Vegetables</option>
-                        <option value="dairy">Dairy</option>
-                        <option value="snacks">Snacks</option>
-                        <option value="beverages">Beverages</option>
-                        <option value="meat">Meat</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Price (₹)</label>
-                    <input type="number" id="product-price" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label>Stock</label>
-                    <input type="number" id="product-stock" required>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="product-description" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Image URL</label>
-                    <input type="url" id="product-image" required>
-                </div>
-                <button type="submit" class="btn-primary">Save Product</button>
-            </form>
+    <div id="addProductCard" class="card" style="margin-top:12px; display:none;">
+      <h3 id="formTitle">Add Product</h3>
+      <form id="addForm">
+        <input type="hidden" id="productId" />
+        <label>Name</label>
+        <input id="pName" required />
+        <label>Category</label>
+        <input id="pCategory" required />
+        <label>Price</label>
+        <input id="pPrice" type="number" step="0.01" required />
+        <label>Stock</label>
+        <input id="pStock" type="number" required />
+        <label>Description</label>
+        <textarea id="pDesc"></textarea>
+        <label>Image URL</label>
+        <input id="pImage" />
+        <div style="margin-top:8px;">
+          <button class="btn btn-primary" type="submit">Save</button>
+          <button class="btn" type="button" onclick="hideAddForm()">Cancel</button>
         </div>
+      </form>
     </div>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 GroceryMart. All rights reserved.</p>
+    <div class="grid" style="margin-top:16px;">
+      <div>
+        <div class="card">
+          <h3>Products</h3>
+          <div id="productList"></div>
         </div>
-    </footer>
 
-    <script src="js/api.js"></script>
-    <script src="js/admin.js"></script>
+        <div class="card" style="margin-top:12px;">
+          <h3>Orders</h3>
+          <div id="orderList"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>Users</h3>
+          <div id="userList"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Activity / Logs</h3>
+          <div id="logs"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
 </body>
 </html>
-
-

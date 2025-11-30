@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
@@ -7,57 +8,35 @@ const { authAdmin } = require('../middleware/auth');
 router.get('/products', authAdmin, async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
-        res.json({
-            success: true,
-            products
-        });
+        res.json({ success: true, products });
     } catch (error) {
         console.error('Get products error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Get single product (admin)
+// Get product by id
 router.get('/products/:id', authAdmin, async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-        res.json({
-            success: true,
-            product
-        });
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ success: true, product });
     } catch (error) {
-        console.error('Get product error:', error);
+        console.error('Get product by id error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Add product
+// Add new product
 router.post('/products/add', authAdmin, async (req, res) => {
     try {
         const { name, category, price, stock, description, image } = req.body;
-
-        if (!name || !category || !price || stock === undefined) {
-            return res.status(400).json({ message: 'Name, category, price, and stock are required' });
+        if (!name || !category || price == null) {
+            return res.status(400).json({ message: 'Missing required fields' });
         }
-
-        const product = new Product({
-            name,
-            category,
-            price,
-            stock,
-            description: description || '',
-            image: image || 'https://via.placeholder.com/300'
-        });
-
+        const product = new Product({ name, category, price, stock: stock || 0, description: description || '', image: image || undefined });
         await product.save();
-
-        res.status(201).json({
-            success: true,
-            product
-        });
+        res.json({ success: true, product });
     } catch (error) {
         console.error('Add product error:', error);
         res.status(500).json({ message: 'Server error' });
@@ -67,27 +46,10 @@ router.post('/products/add', authAdmin, async (req, res) => {
 // Update product
 router.put('/products/:id', authAdmin, async (req, res) => {
     try {
-        const { name, category, price, stock, description, image } = req.body;
-
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-
-        // Update fields
-        if (name) product.name = name;
-        if (category) product.category = category;
-        if (price !== undefined) product.price = price;
-        if (stock !== undefined) product.stock = stock;
-        if (description !== undefined) product.description = description;
-        if (image !== undefined) product.image = image;
-
-        await product.save();
-
-        res.json({
-            success: true,
-            product
-        });
+        const updates = req.body;
+        const product = await Product.findByIdAndUpdate(req.params.id, updates, { new: true });
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ success: true, product });
     } catch (error) {
         console.error('Update product error:', error);
         res.status(500).json({ message: 'Server error' });
@@ -97,17 +59,9 @@ router.put('/products/:id', authAdmin, async (req, res) => {
 // Delete product
 router.delete('/products/:id', authAdmin, async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-
-        await Product.findByIdAndDelete(req.params.id);
-
-        res.json({
-            success: true,
-            message: 'Product deleted successfully'
-        });
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json({ success: true, message: 'Product deleted successfully' });
     } catch (error) {
         console.error('Delete product error:', error);
         res.status(500).json({ message: 'Server error' });
@@ -115,5 +69,3 @@ router.delete('/products/:id', authAdmin, async (req, res) => {
 });
 
 module.exports = router;
-
-

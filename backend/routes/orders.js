@@ -1,9 +1,10 @@
+
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
-const { authUser } = require('../middleware/auth');
+const { authUser, authAdmin } = require('../middleware/auth');
 
 // Create order
 router.post('/order/create', authUser, async (req, res) => {
@@ -16,41 +17,71 @@ router.post('/order/create', authUser, async (req, res) => {
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'Cart is empty' });
         }
-        let totalAmount = 0;
-        const orderItems = [];
-        for (const item of cart.items) {
-            const product = item.product;
-            totalAmount += product.price * item.quantity;
-            if (product.stock < item.quantity) {
-                return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
-            }
-            orderItems.push({ product: product._id, quantity: item.quantity, price: product.price });
-        }
-        totalAmount += 50;
+
+        let total = 0;
+        const items = cart.items.map(i => {
+            const price = i.product.price || 0;
+            total += price * i.quantity;
+            return { product: i.product._id, quantity: i.quantity, price };
+        });
+
         const order = new Order({
-            orderNumber: `ORD-${Date.now()}`,
             user: req.user._id,
-            items: orderItems,
-            totalAmount,
+            items,
             shippingAddress,
             phone,
-            paymentMethod: paymentMethod || 'cod',
-            status: 'pending'
+            paymentMethod: paymentMethod || 'cash',
+            total
         });
+
         await order.save();
-        for (const item of cart.items) {
-            await Product.findByIdAndUpdate(item.product._id, { $inc: { stock: -item.quantity } });
-        }
+
+        // Clear cart
         cart.items = [];
         await cart.save();
-        res.status(201).json({ success: true, order });
+
+        res.json({ success: true, order });
     } catch (error) {
         console.error('Create order error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Get order history
+// Get order by id
+router.get('/order/:id', authUser, async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).populate('items.product');
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+
+        // allow admin or owner
+        if (String(order.user) !== String(req.user._id)) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        res.json({ success: true, order });
+    } catch (error) {
+        console.error('Get order error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Update delivery/status (admin)
+router.put('/order/:id/status', authAdmin, async (req, res) => {
+    try {
+        const { status } = req.body;
+        if (!status) return res.status(400).json({ message: 'Status is required' });
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+        order.status = status;
+        await order.save();
+        res.json({ success: true, order });
+    } catch (error) {
+        console.error('Update order status error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Get order history (user)
 router.get('/order/history', authUser, async (req, res) => {
     try {
         const orders = await Order.find({ user: req.user._id }).populate('items.product').sort({ createdAt: -1 });
@@ -62,4 +93,3 @@ router.get('/order/history', authUser, async (req, res) => {
 });
 
 module.exports = router;
-
