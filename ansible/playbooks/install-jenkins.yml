@@ -1,0 +1,74 @@
+---
+- name: Install Jenkins
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install Java (Debian/Ubuntu)
+      apt:
+        name:
+          - openjdk-17-jdk
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Java (RedHat/CentOS/Amazon Linux)
+      yum:
+        name:
+          - java-17-openjdk
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Add Jenkins repository key (Debian/Ubuntu)
+      apt_key:
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Add Jenkins repository (Debian/Ubuntu)
+      apt_repository:
+        repo: "deb https://pkg.jenkins.io/debian binary/"
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Jenkins (Debian/Ubuntu)
+      apt:
+        name: jenkins
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Jenkins (RedHat/CentOS/Amazon Linux)
+      yum:
+        name: jenkins
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Start and enable Jenkins service
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Wait for Jenkins to start
+      wait_for:
+        port: 8080
+        delay: 10
+        timeout: 300
+
+    - name: Display Jenkins initial admin password
+      command: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_password
+      changed_when: false
+      failed_when: false
+
+    - name: Show Jenkins access information
+      debug:
+        msg: 
+          - "Jenkins is running on port 8080"
+          - "Initial admin password: {{ jenkins_password.stdout }}"
+          - "Access Jenkins at: http://{{ ansible_default_ipv4.address }}:8080"
+
+

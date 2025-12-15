@@ -1,0 +1,59 @@
+---
+- name: Deploy Docker Compose Application
+  hosts: all
+  become: yes
+  vars:
+    project_dir: /opt/grocery-store
+  tasks:
+    - name: Create project directory
+      file:
+        path: "{{ project_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy application files
+      copy:
+        src: "{{ item }}"
+        dest: "{{ project_dir }}/"
+        mode: preserve
+      loop:
+        - ../docker-compose.yml
+        - ../frontend/
+        - ../backend/
+        - ../mongo-init.js
+
+    - name: Ensure Docker Compose is installed
+      pip:
+        name: docker-compose
+        state: present
+
+    - name: Stop existing containers
+      command: docker-compose down
+      args:
+        chdir: "{{ project_dir }}"
+      ignore_errors: yes
+
+    - name: Build and start containers
+      command: docker-compose up -d --build
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Wait for services to be ready
+      wait_for:
+        port: 3000
+        host: localhost
+        delay: 10
+        timeout: 60
+
+    - name: Check container status
+      command: docker-compose ps
+      args:
+        chdir: "{{ project_dir }}"
+      register: container_status
+      changed_when: false
+
+    - name: Display container status
+      debug:
+        var: container_status.stdout_lines
+
+

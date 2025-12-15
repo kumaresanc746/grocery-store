@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Grocery Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🛒 GroceryMart - Admin</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#" onclick="logoutAdmin()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container admin-dashboard">
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">Control Center</p>
+                <h1>Admin Dashboard</h1>
+                <p>Monitor inventory, customers, orders, and delivery statuses in one view.</p>
+            </div>
+            <button class="btn-primary" onclick="showAddProductModal()">Add New Product</button>
+        </header>
+
+        <section class="dashboard-summary">
+            <article class="summary-card">
+                <p>Total Products</p>
+                <h2 id="stat-products-count">0</h2>
+                <span id="stat-low-stock" class="summary-meta">0 low stock</span>
+            </article>
+            <article class="summary-card">
+                <p>Total Customers</p>
+                <h2 id="stat-users-count">0</h2>
+                <span class="summary-meta">Active shoppers</span>
+            </article>
+            <article class="summary-card">
+                <p>Pending Orders</p>
+                <h2 id="stat-pending-count">0</h2>
+                <span class="summary-meta">Need fulfillment</span>
+            </article>
+            <article class="summary-card">
+                <p>Deliveries Today</p>
+                <h2 id="stat-today-count">0</h2>
+                <span class="summary-meta">Scheduled drops</span>
+            </article>
+        </section>
+
+        <div class="dashboard-tabs">
+            <button class="tab-button active" data-tab="products">Products</button>
+            <button class="tab-button" data-tab="users">Customers</button>
+            <button class="tab-button" data-tab="orders">Orders & Delivery</button>
+        </div>
+
+        <section id="tab-products" class="tab-panel active">
+            <div class="table-card">
+                <div class="table-card__header">
+                    <div>
+                        <h2>Product Catalog</h2>
+                        <p>Manage listings, pricing, and stock levels.</p>
+                    </div>
+                    <button class="btn-primary" onclick="showAddProductModal()">Add Product</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-products-table">
+                            <!-- Products loaded via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-users" class="tab-panel">
+            <div class="table-card">
+                <div class="table-card__header">
+                    <div>
+                        <h2>Customer Directory</h2>
+                        <p>Recent signups and contact information.</p>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-table">
+                            <!-- Users loaded via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-orders" class="tab-panel">
+            <div class="table-card">
+                <div class="table-card__header">
+                    <div>
+                        <h2>Orders & Delivery</h2>
+                        <p>Track fulfillment progress and update delivery info.</p>
+                    </div>
+                </div>
+                <div class="orders-toolbar">
+                    <input type="search" id="order-search" placeholder="Search orders, customers, tracking IDs">
+                    <select id="order-status-filter">
+                        <option value="all">All statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Expected Delivery</th>
+                                <th>Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-table">
+                            <!-- Orders loaded via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeProductModal()">&times;</span>
+            <h2 id="modal-title">Add Product</h2>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="product-category" required>
+                        <option value="fruits">Fruits</option>
+                        <option value="vegetables">Vegetables</option>
+                        <option value="dairy">Dairy</option>
+                        <option value="snacks">Snacks</option>
+                        <option value="beverages">Beverages</option>
+                        <option value="meat">Meat</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" id="product-price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" id="product-stock" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="product-description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="product-image" required>
+                </div>
+                <button type="submit" class="btn-primary">Save Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order / Delivery Modal -->
+    <div id="order-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeOrderModal()">&times;</span>
+            <h2>Update Order</h2>
+            <p class="modal-subtitle" id="order-modal-number">Order</p>
+            <form id="order-form">
+                <div class="form-group">
+                    <label for="order-status-select">Status</label>
+                    <select id="order-status-select" required>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Delivery Partner</label>
+                    <input type="text" id="delivery-partner" placeholder="e.g. Local Courier, Dunzo">
+                </div>
+                <div class="form-group">
+                    <label>Tracking ID</label>
+                    <input type="text" id="delivery-tracking" placeholder="Tracking code">
+                </div>
+                <div class="form-group">
+                    <label>Expected Delivery</label>
+                    <input type="date" id="delivery-date">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="delivery-notes" placeholder="Delivery instructions or remarks"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 GroceryMart. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
+
+

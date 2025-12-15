@@ -1,0 +1,54 @@
+---
+- name: Copy Application Files to Servers
+  hosts: all
+  become: yes
+  vars:
+    app_dir: /opt/grocery-store
+  tasks:
+    - name: Create application directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy frontend files
+      copy:
+        src: "{{ playbook_dir }}/../frontend/"
+        dest: "{{ app_dir }}/frontend/"
+        mode: preserve
+
+    - name: Copy backend files
+      copy:
+        src: "{{ playbook_dir }}/../backend/"
+        dest: "{{ app_dir }}/backend/"
+        mode: preserve
+
+    - name: Copy Docker Compose file
+      copy:
+        src: "{{ playbook_dir }}/../docker-compose.yml"
+        dest: "{{ app_dir }}/docker-compose.yml"
+        mode: '0644'
+
+    - name: Copy MongoDB init script
+      copy:
+        src: "{{ playbook_dir }}/../mongo-init.js"
+        dest: "{{ app_dir }}/mongo-init.js"
+        mode: '0644'
+
+    - name: Set ownership of application directory
+      file:
+        path: "{{ app_dir }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        recurse: yes
+
+    - name: Display application directory structure
+      command: find {{ app_dir }} -type f | head -20
+      register: app_files
+      changed_when: false
+
+    - name: Show application files
+      debug:
+        var: app_files.stdout_lines
+
+
