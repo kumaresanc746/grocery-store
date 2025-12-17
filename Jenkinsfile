@@ -79,14 +79,16 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-            steps {
-                sh """
-                kubectl apply -f k8s/
-                kubectl rollout status deployment/backend
-                kubectl rollout status deployment/frontend
-                """
-            }
-        }
+    steps {
+        sh '''
+        kubectl create namespace grocery-store --dry-run=client -o yaml | kubectl apply -f -
+        kubectl apply -f k8s/
+        kubectl rollout status deployment/backend -n grocery-store
+        kubectl rollout status deployment/frontend -n grocery-store
+        '''
+    }
+}
+
     }
 
     post {
