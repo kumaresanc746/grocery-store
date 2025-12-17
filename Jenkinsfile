@@ -72,16 +72,22 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh """
-                kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-                kubectl apply -n ${NAMESPACE} -f k8s/
-                kubectl rollout status deployment/backend -n ${NAMESPACE}
-                kubectl rollout status deployment/frontend -n ${NAMESPACE}
-                """
-            }
-        }
+      stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+        kubectl create namespace grocery-store --dry-run=client -o yaml | kubectl apply -f -
+
+        kubectl delete svc frontend -n grocery-store --ignore-not-found
+        kubectl delete svc mongo-express -n grocery-store --ignore-not-found
+
+        kubectl apply -n grocery-store -f k8s/
+
+        kubectl rollout status deployment/backend -n grocery-store
+        kubectl rollout status deployment/frontend -n grocery-store
+        '''
+    }
+}
+
     }
 
     post {
