@@ -3,9 +3,8 @@ kind: Ingress
 metadata:
   name: grocery-store-ingress
   namespace: grocery-store
-  annotations:
-    kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
   rules:
   - http:
       paths:
@@ -23,3 +22,4 @@ spec:
             name: backend
             port:
               number: 3000
+
