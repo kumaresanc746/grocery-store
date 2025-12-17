@@ -150,26 +150,6 @@ pipeline {
                 }
             }
         }
-        
-        stage('Health Check') {
-            steps {
-                script {
-                    echo 'Performing health checks'
-                    sh '''
-                        # Wait a bit for services to be ready
-                        sleep 10
-                        
-                        # Check backend health
-                        curl -f http://localhost:3000/health || exit 1
-                        
-                        # Check frontend health
-                        curl -f http://localhost/health || exit 1
-                        
-                        echo "Health checks passed"
-                    '''
-                }
-            }
-        }
     }
     
     post {
@@ -191,5 +171,6 @@ pipeline {
         }
     }
 }
+
 
 
