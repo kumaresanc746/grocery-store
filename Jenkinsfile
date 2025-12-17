@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_PREFIX = 'kumaresan05'
-        KUBERNETES_NAMESPACE = 'default'
+        NAMESPACE = 'grocery-store'
     }
 
     stages {
@@ -54,12 +54,6 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                sh 'echo "Tests would run here"'
-            }
-        }
-
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(
@@ -79,16 +73,15 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-        kubectl create namespace grocery-store --dry-run=client -o yaml | kubectl apply -f -
-        kubectl apply -f k8s/
-        kubectl rollout status deployment/backend -n grocery-store
-        kubectl rollout status deployment/frontend -n grocery-store
-        '''
-    }
-}
-
+            steps {
+                sh """
+                kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+                kubectl apply -n ${NAMESPACE} -f k8s/
+                kubectl rollout status deployment/backend -n ${NAMESPACE}
+                kubectl rollout status deployment/frontend -n ${NAMESPACE}
+                """
+            }
+        }
     }
 
     post {
