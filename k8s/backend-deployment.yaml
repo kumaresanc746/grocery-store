@@ -1,10 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-deployment
-  namespace: grocery-store
+  name: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -15,63 +14,19 @@ spec:
     spec:
       containers:
       - name: backend
-        image: grocery-store-backend:latest
-        imagePullPolicy: IfNotPresent
+        image: kumaresan05/grocery-backend:latest
         ports:
         - containerPort: 3000
         env:
-        - name: PORT
-          value: "3000"
-        - name: MONGODB_URI
-          value: "mongodb://mongo-service:27017/grocery-store"
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: jwt-secret
-        - name: NODE_ENV
-          value: "production"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: MONGO_URI
+          value: mongodb://mongo:27017/grocery
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
-  namespace: grocery-store
+  name: backend
 spec:
   selector:
     app: backend
   ports:
-  - protocol: TCP
-    port: 3000
-    targetPort: 3000
-  type: ClusterIP
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: backend-secrets
-  namespace: grocery-store
-type: Opaque
-stringData:
-  jwt-secret: your-secret-key-change-in-production
-
-
+  - port: 3000
