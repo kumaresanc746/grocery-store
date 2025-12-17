@@ -1,51 +1,97 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    DOCKERHUB = "kumaresan05"
-  }
-
-  stages {
-
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/kumaresanc746/grocery-store.git'
-      }
+    environment {
+        DOCKER_IMAGE_PREFIX = 'kumaresan05'
+        KUBERNETES_NAMESPACE = 'default'
     }
 
-    stage('Build Images') {
-      steps {
-        sh '''
-        docker build -t $DOCKERHUB/grocery-backend:latest backend
-        docker build -t $DOCKERHUB/grocery-frontend:latest frontend
-        '''
-      }
-    }
+    stages {
 
-    stage('Push Images') {
-      steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub',
-          usernameVariable: 'USER',
-          passwordVariable: 'PASS'
-        )]) {
-          sh '''
-          echo $PASS | docker login -u $USER --password-stdin
-          docker push $DOCKERHUB/grocery-backend:latest
-          docker push $DOCKERHUB/grocery-frontend:latest
-          '''
+        stage('Install Dependencies') {
+            parallel {
+                stage('Backend Dependencies') {
+                    steps {
+                        dir('backend') {
+                            sh 'npm install'
+                        }
+                    }
+                }
+                stage('Frontend Dependencies') {
+                    steps {
+                        sh 'echo "Frontend is static files, no dependencies to install"'
+                    }
+                }
+            }
         }
-      }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'echo "Frontend build complete"'
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            parallel {
+                stage('Build Backend Image') {
+                    steps {
+                        sh """
+                        docker build -t ${DOCKER_IMAGE_PREFIX}/grocery-backend:${BUILD_NUMBER} backend
+                        docker tag ${DOCKER_IMAGE_PREFIX}/grocery-backend:${BUILD_NUMBER} ${DOCKER_IMAGE_PREFIX}/grocery-backend:latest
+                        """
+                    }
+                }
+                stage('Build Frontend Image') {
+                    steps {
+                        sh """
+                        docker build -t ${DOCKER_IMAGE_PREFIX}/grocery-frontend:${BUILD_NUMBER} frontend
+                        docker tag ${DOCKER_IMAGE_PREFIX}/grocery-frontend:${BUILD_NUMBER} ${DOCKER_IMAGE_PREFIX}/grocery-frontend:latest
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'echo "Tests would run here"'
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                    echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                    docker push ${DOCKER_IMAGE_PREFIX}/grocery-backend:${BUILD_NUMBER}
+                    docker push ${DOCKER_IMAGE_PREFIX}/grocery-backend:latest
+                    docker push ${DOCKER_IMAGE_PREFIX}/grocery-frontend:${BUILD_NUMBER}
+                    docker push ${DOCKER_IMAGE_PREFIX}/grocery-frontend:latest
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh """
+                kubectl apply -f k8s/
+                kubectl rollout status deployment/backend
+                kubectl rollout status deployment/frontend
+                """
+            }
+        }
     }
 
-    stage('Deploy to Kubernetes') {
-      steps {
-        sh '''
-        kubectl apply -f k8s/
-        kubectl rollout status deployment/backend
-        kubectl rollout status deployment/frontend
-        '''
-      }
+    post {
+        always {
+            sh 'docker system prune -f || true'
+        }
     }
-  }
 }
