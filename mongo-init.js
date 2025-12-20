@@ -7,18 +7,19 @@ db = db.getSiblingDB('grocery-store');
 print('Creating default admin user...');
 
 // Check if admin already exists
-const existingAdmin = db.admins.findOne({ email: 'admin@grocerystore.com' });
+// Check if admin already exists
+const existingAdmin = db.admins.findOne({ email: 'admin@grocerymart.com' });
 
 if (!existingAdmin) {
     db.admins.insertOne({
         name: 'Admin',
-        email: 'admin@grocerystore.com',
+        email: 'admin@grocerymart.com',
         // Password: admin123 (hashed with bcrypt - salt rounds: 10)
         password: '$2a$10$rZ5c3qH8vK9mN2pL4xW6YeF7gH8iJ9kL0mN1oP2qR3sT4uV5wX6yZ',
         createdAt: new Date()
     });
     print('✓ Admin user created successfully');
-    print('  Email: admin@grocerystore.com');
+    print('  Email: admin@grocerymart.com');
     print('  Password: admin123');
 } else {
     print('✓ Admin user already exists');
@@ -95,5 +96,5 @@ if (productCount === 0) {
 
 print('\n=== Initialization Complete ===');
 print('Admin Login: http://your-ip:31581/admin-login.html');
-print('Email: admin@grocerystore.com');
+print('Email: admin@grocerymart.com');
 print('Password: admin123');
