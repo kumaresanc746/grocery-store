@@ -2,16 +2,20 @@
 async function loadProducts() {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get('category') || document.getElementById('category-filter')?.value || '';
-    const search = document.getElementById('search-input')?.value || '';
-    
+
+    let search = document.getElementById('search-input')?.value;
+    if (search === undefined || search === null) {
+        search = urlParams.get('search') || '';
+    }
+
     let endpoint = '/products?';
     if (category) endpoint += `category=${category}&`;
     if (search) endpoint += `search=${encodeURIComponent(search)}&`;
-    
+
     try {
         const { data } = await apiRequest(endpoint);
         const productsGrid = document.getElementById('products-grid');
-        
+
         if (data.products && data.products.length > 0) {
             productsGrid.innerHTML = data.products.map(product => `
                 <div class="product-card" onclick="window.location.href='product-details.html?id=${product._id}'">
@@ -42,13 +46,13 @@ async function addToCart(productId, quantity = 1) {
         window.location.href = 'login.html';
         return;
     }
-    
+
     try {
         const { data } = await apiRequest('/cart/add', {
             method: 'POST',
             body: JSON.stringify({ productId, quantity })
         });
-        
+
         if (data.success) {
             alert('Item added to cart!');
             updateCartCount();
@@ -62,11 +66,19 @@ async function addToCart(productId, quantity = 1) {
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     const urlParams = new URLSearchParams(window.location.search);
+
     const category = urlParams.get('category');
     if (category) {
         const categoryFilter = document.getElementById('category-filter');
         if (categoryFilter) categoryFilter.value = category;
     }
+
+    const search = urlParams.get('search');
+    if (search) {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) searchInput.value = search;
+    }
+
     loadProducts();
 });
 
