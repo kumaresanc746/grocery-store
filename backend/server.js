@@ -15,36 +15,46 @@ app.use(express.json());
 const Admin = require('./models/Admin');
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongo:27017/grocery-store')
+const mongodbUri = process.env.MONGODB_URI || 'mongodb://mongo:27017/grocery-store';
+console.log(`Connecting to MongoDB at: ${mongodbUri}`);
+
+mongoose.connect(mongodbUri)
     .then(async () => {
-        console.log('MongoDB Connected');
+        console.log('✓ MongoDB Connected Successfully');
 
         // Seed Admin User
         try {
-            const email = 'admin@grocerymart.com';
-            const adminExists = await Admin.findOne({ email });
+            const Admin = require('./models/Admin');
+            const adminEmail = 'admin@grocerymart.com';
 
-            // Cleanup old email if it exists
+            // Cleanup any duplicates or old emails
             await Admin.deleteMany({ email: 'admin@grocerystore.com' });
 
-            if (!adminExists) {
-                await Admin.create({
-                    name: 'Admin',
-                    email: email,
+            let admin = await Admin.findOne({ email: adminEmail });
+
+            if (!admin) {
+                console.log(`Creating default admin: ${adminEmail}`);
+                admin = new Admin({
+                    name: 'Administrator',
+                    email: adminEmail,
                     password: 'admin123'
                 });
-                console.log('✓ Default admin user created: ' + email);
+                await admin.save();
+                console.log('✓ Admin user created successfully');
             } else {
-                // Force update password to ensure it's admin123
-                adminExists.password = 'admin123';
-                await adminExists.save();
-                console.log('✓ Admin user password verified/updated for: ' + email);
+                console.log(`Verifying admin password for: ${adminEmail}`);
+                admin.password = 'admin123';
+                await admin.save();
+                console.log('✓ Admin user password updated/verified');
             }
         } catch (error) {
-            console.error('Error seeding admin user:', error);
+            console.error('CRITICAL: Error during admin seeding:', error);
         }
     })
-    .catch(err => console.error('MongoDB Connection Error:', err));
+    .catch(err => {
+        console.error('FATAL: MongoDB Connection Error:', err.message);
+        console.error('Please ensure MongoDB is running and MONGODB_URI is correct.');
+    });
 
 // Routes
 app.use('/api', require('./routes/auth'));
