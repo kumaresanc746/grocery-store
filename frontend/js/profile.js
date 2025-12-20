@@ -7,7 +7,7 @@ function showTab(tabName) {
     document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active');
     });
-
+    
     // Show selected tab
     document.getElementById(`${tabName}-tab`).classList.add('active');
     event.target.classList.add('active');
@@ -20,11 +20,11 @@ async function loadOrders() {
         window.location.href = 'login.html';
         return;
     }
-
+    
     try {
         const { data } = await apiRequest('/order/history');
         const ordersList = document.getElementById('orders-list');
-
+        
         if (data.orders && data.orders.length > 0) {
             ordersList.innerHTML = data.orders.map(order => `
                 <div class="order-card">
@@ -70,51 +70,23 @@ async function loadSettings() {
 // Update profile
 document.getElementById('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-
+    
     const name = document.getElementById('settings-name').value;
     const email = document.getElementById('settings-email').value;
     const address = document.getElementById('settings-address').value;
-
+    
     try {
         const { data } = await apiRequest('/user/update', {
             method: 'PUT',
             body: JSON.stringify({ name, email, address })
         });
-
+        
         if (data.success) {
             localStorage.setItem('user', JSON.stringify(data.user));
             alert('Profile updated successfully');
         }
     } catch (error) {
-        alert(error.response?.data?.message || 'Failed to update profile');
-    }
-});
-
-// Change password
-document.getElementById('password-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-
-    if (newPassword !== confirmPassword) {
-        alert('New passwords do not match');
-        return;
-    }
-
-    try {
-        const { data } = await apiRequest('/user/change-password', {
-            method: 'PUT',
-            body: JSON.stringify({ currentPassword, newPassword })
-        });
-
-        if (data.success) {
-            alert('Password updated successfully');
-            e.target.reset();
-        }
-    } catch (error) {
-        alert(error.response?.data?.message || 'Failed to change password');
+        alert('Failed to update profile');
     }
 });
 
