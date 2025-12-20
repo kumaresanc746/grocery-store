@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: grocery-store
+data:
+  config.js: |
+    window.BACKEND_URL = window.location.protocol + '//' + window.location.hostname + ':30001/api';
