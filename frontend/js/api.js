@@ -1,11 +1,11 @@
 // API Configuration: Smart detection for Ingress vs direct NodePort access
 const getApiBaseUrl = () => {
-    // If we have a manually set BACKEND_URL in config.js (from ConfigMap), use it
+    const { hostname, port, protocol } = window.location;
+
+    // If we have a manually set BACKEND_URL, use it ONLY if it's healthy
     if (window.BACKEND_URL && !window.BACKEND_URL.includes('31581')) {
         return window.BACKEND_URL;
     }
-
-    const { hostname, port, protocol } = window.location;
 
     // Detect if we are accessing via the Frontend NodePort
     if (port === '31581') {

@@ -45,13 +45,10 @@
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch(`${API_BASE_URL}/admin/login`, {
+                const { response, data } = await apiRequest('/admin/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-
-                const data = await response.json();
 
                 if (response.ok) {
                     localStorage.setItem('adminToken', data.token);
@@ -61,7 +58,8 @@
                     document.getElementById('error-message').textContent = data.message || 'Login failed';
                 }
             } catch (error) {
-                document.getElementById('error-message').textContent = 'Connection error';
+                console.error('Admin Login Error:', error);
+                document.getElementById('error-message').textContent = 'Unable to connect to server. Please try again later.';
             }
         });
     </script>

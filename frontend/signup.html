@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Grocery Store</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <nav class="navbar">
         <div class="container">
@@ -53,16 +55,13 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const address = document.getElementById('address').value;
-            
+
             try {
-                const response = await fetch(`${API_BASE_URL}/signup`, {
+                const { response, data } = await apiRequest('/signup', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password, address })
                 });
-                
-                const data = await response.json();
-                
+
                 if (response.ok) {
                     alert('Sign up successful! Please login.');
                     window.location.href = 'login.html';
@@ -70,11 +69,11 @@
                     document.getElementById('error-message').textContent = data.message || 'Sign up failed';
                 }
             } catch (error) {
-                document.getElementById('error-message').textContent = 'Connection error';
+                console.error('Signup Error:', error);
+                document.getElementById('error-message').textContent = 'Unable to connect to server. Please try again later.';
             }
         });
     </script>
 </body>
+
 </html>
-
-
