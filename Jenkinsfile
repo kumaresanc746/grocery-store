@@ -82,8 +82,9 @@ pipeline {
         # Apply application manifests (includes the automated Admin Fix)
         kubectl apply -f k8s/
 
-        # Apply monitoring stack
-        kubectl apply -f monitoring/
+        # Apply monitoring stack (Skipping the ServiceMonitor which requires a special Operator)
+        kubectl apply -f monitoring/prometheus-deployment.yaml
+        kubectl apply -f monitoring/grafana-deployment.yaml
 
         # Wait for backend pod to be ready
         kubectl rollout status deployment/backend -n grocery-store
