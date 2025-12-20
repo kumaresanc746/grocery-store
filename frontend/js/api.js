@@ -1,6 +1,6 @@
-// API Configu
 // API Configuration
-const API_BASE_URL = `http://${window.location.hostname}:30001`;
+// Use environment variable if available, otherwise construct from window location
+const API_BASE_URL = window.BACKEND_URL || `http://${window.location.hostname}:30001/api`;
 // Helper function to get auth token
 function getAuthToken() {
     return localStorage.getItem('token');

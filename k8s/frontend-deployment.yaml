@@ -17,6 +17,26 @@ spec:
         image: kumaresan05/grocery-frontend:latest
         ports:
         - containerPort: 80
+        volumeMounts:
+        - name: config
+          mountPath: /usr/share/nginx/html/js/config.js
+          subPath: config.js
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: frontend-config
 ---
 apiVersion: v1
 kind: Service
@@ -29,3 +49,4 @@ spec:
   ports:
   - port: 80
     targetPort: 80
+    nodePort: 31581

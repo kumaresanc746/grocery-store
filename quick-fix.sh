@@ -1,10 +1,13 @@
+# Complete Fix - Quick Version (No Docker Rebuild)
+# This updates the ConfigMap and forces frontend to reload
+
 cd ~/grocery-store
 
 echo "=== Quick Fix (No Rebuild Required) ==="
 echo ""
 
 # Update ConfigMap
-cat > k8s/frontend-configmap.yaml << 'INNEREOF'
+cat > k8s/frontend-configmap.yaml << 'EOF'
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,7 +16,7 @@ metadata:
 data:
   config.js: |
     window.BACKEND_URL = window.location.protocol + '//' + window.location.hostname + ':30001/api';
-INNEREOF
+EOF
 
 # Apply ConfigMap
 kubectl apply -f k8s/frontend-configmap.yaml
@@ -37,3 +40,9 @@ echo "=== Done! ==="
 echo ""
 EC2_IP=$(curl -s http://checkip.amazonaws.com)
 echo "Access: http://$EC2_IP:31581/login.html"
+echo ""
+echo "In browser:"
+echo "  1. Hard refresh (Ctrl+Shift+R)"
+echo "  2. Clear cache"
+echo "  3. Try login"
+echo ""

@@ -5,4 +5,5 @@ metadata:
   namespace: grocery-store
 data:
   config.js: |
+    // Use NodePort for external browser access
     window.BACKEND_URL = window.location.protocol + '//' + window.location.hostname + ':30001/api';
