@@ -75,13 +75,17 @@ pipeline {
       stage('Deploy to Kubernetes') {
     steps {
         sh '''
+        # Create namespaces
         kubectl create namespace grocery-store --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
 
-        kubectl delete svc frontend -n grocery-store --ignore-not-found
-        kubectl delete svc mongo-express -n grocery-store --ignore-not-found
+        # Apply application manifests (includes the automated Admin Fix)
+        kubectl apply -f k8s/
 
-        kubectl apply -n grocery-store -f k8s/
+        # Apply monitoring stack
+        kubectl apply -f monitoring/
 
+        # Wait for backend pod to be ready
         kubectl rollout status deployment/backend -n grocery-store
         kubectl rollout status deployment/frontend -n grocery-store
         '''
