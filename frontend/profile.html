@@ -42,7 +42,7 @@
 
             <div id="settings-tab" class="tab-content">
                 <h2>Account Settings</h2>
-                <form id="settings-form">
+                <form id="settings-form" class="profile-form">
                     <div class="form-group">
                         <label>Name</label>
                         <input type="text" id="settings-name" required>
@@ -56,6 +56,25 @@
                         <textarea id="settings-address" required></textarea>
                     </div>
                     <button type="submit" class="btn-primary">Update Profile</button>
+                </form>
+
+                <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border-color);">
+
+                <h2>Security</h2>
+                <form id="password-form" class="profile-form">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="new-password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirm-password" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn-primary">Change Password</button>
                 </form>
             </div>
         </div>

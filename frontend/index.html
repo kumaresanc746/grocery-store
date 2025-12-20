@@ -31,7 +31,13 @@
         <div class="hero-content">
             <h2>Fresh Groceries Delivered to Your Door</h2>
             <p>Shop from the comfort of your home</p>
-            <a href="products.html" class="btn-primary">Shop Now</a>
+            <form onsubmit="event.preventDefault(); window.location.href='products.html?search=' + document.getElementById('hero-search').value" class="hero-search-form">
+                <input type="text" id="hero-search" placeholder="Search for fruits, vegetables, etc..." class="hero-search-input">
+                <button type="submit" class="btn-primary">Search</button>
+            </form>
+            <div class="hero-actions">
+                <a href="products.html" class="btn-secondary">Browse All</a>
+            </div>
         </div>
     </div>
 
