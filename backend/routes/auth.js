@@ -95,24 +95,22 @@ router.post('/admin/login', async (req, res) => {
 
         // Find admin
         const searchEmail = email.toLowerCase().trim();
-        console.log(`Login attempt for admin: ${searchEmail}`);
+        console.log(`Admin login attempt for: ${searchEmail}`);
 
         const admin = await Admin.findOne({ email: searchEmail });
 
         if (!admin) {
-            console.log(`Failed login: Admin not found for ${searchEmail}`);
+            console.log(`Admin not found: ${searchEmail}`);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         // Check password
         const isMatch = await admin.comparePassword(password);
+        console.log(`Password match result for ${searchEmail}: ${isMatch}`);
 
         if (!isMatch) {
-            console.log(`Failed login: Password mismatch for ${searchEmail}`);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-
-        console.log(`Successful login for admin: ${searchEmail}`);
 
         // Generate token
         const token = jwt.sign({ adminId: admin._id }, JWT_SECRET, { expiresIn: '7d' });
