@@ -21,16 +21,24 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongo:27017/grocery-store
 
         // Seed Admin User
         try {
-            const adminExists = await Admin.findOne({ email: 'admin@grocerystore.com' });
+            const email = 'admin@grocerymart.com';
+            const adminExists = await Admin.findOne({ email });
+
+            // Cleanup old email if it exists
+            await Admin.deleteMany({ email: 'admin@grocerystore.com' });
+
             if (!adminExists) {
                 await Admin.create({
                     name: 'Admin',
-                    email: 'admin@grocerystore.com',
+                    email: email,
                     password: 'admin123'
                 });
-                console.log('✓ Default admin user created');
+                console.log('✓ Default admin user created: ' + email);
             } else {
-                console.log('✓ Admin user already exists');
+                // Force update password to ensure it's admin123
+                adminExists.password = 'admin123';
+                await adminExists.save();
+                console.log('✓ Admin user password verified/updated for: ' + email);
             }
         } catch (error) {
             console.error('Error seeding admin user:', error);
