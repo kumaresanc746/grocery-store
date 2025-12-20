@@ -5,5 +5,13 @@ metadata:
   namespace: grocery-store
 data:
   config.js: |
-    // Use Ingress for API access
-    window.BACKEND_URL = window.location.protocol + '//' + window.location.host + '/api';
+    // Smart API Detection: Works for both Ingress and NodePort access
+    (function() {
+      const isNodePort = window.location.port === '31581';
+      if (isNodePort) {
+        window.BACKEND_URL = window.location.protocol + '//' + window.location.hostname + ':30001/api';
+      } else {
+        window.BACKEND_URL = window.location.protocol + '//' + window.location.host + '/api';
+      }
+      console.log('API Routing initialized:', window.BACKEND_URL);
+    })();
