@@ -25,27 +25,26 @@ mongoose.connect(mongodbUri)
         // Seed Admin User
         try {
             const Admin = require('./models/Admin');
-            const adminEmail = 'admin@grocerymart.com';
+            const adminEmails = ['admin@grocerymart.com', 'admin@grocerystore.com'];
 
-            // Cleanup any duplicates or old emails
-            await Admin.deleteMany({ email: 'admin@grocerystore.com' });
+            for (const email of adminEmails) {
+                let admin = await Admin.findOne({ email: email.toLowerCase() });
 
-            let admin = await Admin.findOne({ email: adminEmail });
-
-            if (!admin) {
-                console.log(`Creating default admin: ${adminEmail}`);
-                admin = new Admin({
-                    name: 'Administrator',
-                    email: adminEmail,
-                    password: 'admin123'
-                });
-                await admin.save();
-                console.log('✓ Admin user created successfully');
-            } else {
-                console.log(`Verifying admin password for: ${adminEmail}`);
-                admin.password = 'admin123';
-                await admin.save();
-                console.log('✓ Admin user password updated/verified');
+                if (!admin) {
+                    console.log(`Creating default admin: ${email}`);
+                    admin = new Admin({
+                        name: 'Administrator',
+                        email: email.toLowerCase(),
+                        password: 'admin123'
+                    });
+                    await admin.save();
+                    console.log(`✓ Admin user created successfully: ${email}`);
+                } else {
+                    console.log(`Verifying admin password for: ${email}`);
+                    admin.password = 'admin123';
+                    await admin.save();
+                    console.log(`✓ Admin user password verified/updated for: ${email}`);
+                }
             }
         } catch (error) {
             console.error('CRITICAL: Error during admin seeding:', error);

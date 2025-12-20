@@ -18,30 +18,32 @@ async function initializeAdmin() {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected to MongoDB');
 
-        // Check if admin already exists
-        const existingAdmin = await Admin.findOne({ email: 'admin@grocerystore.com' });
+        // Seed Admin Users
+        const adminEmails = ['admin@grocerymart.com', 'admin@grocerystore.com'];
+        const password = 'admin123';
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        if (existingAdmin) {
-            console.log('Admin user already exists!');
-            console.log('Email: admin@grocerystore.com');
-            console.log('Password: admin123');
-            process.exit(0);
+        for (const email of adminEmails) {
+            const existingAdmin = await Admin.findOne({ email });
+            if (existingAdmin) {
+                existingAdmin.password = hashedPassword;
+                await existingAdmin.save();
+                console.log(`✓ Admin user updated: ${email}`);
+            } else {
+                const admin = new Admin({
+                    name: 'Admin User',
+                    email: email,
+                    password: hashedPassword,
+                    createdAt: new Date()
+                });
+                await admin.save();
+                console.log(`✓ Admin user created: ${email}`);
+            }
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash('admin123', 10);
-
-        // Create admin user
-        const admin = new Admin({
-            name: 'Admin User',
-            email: 'admin@grocerystore.com',
-            password: hashedPassword,
-            createdAt: new Date()
-        });
-
-        await admin.save();
-        console.log('✅ Admin user created successfully!');
-        console.log('Email: admin@grocerystore.com');
+        console.log('\nFinal Admin Credentials:');
+        console.log('Emails: admin@grocerymart.com OR admin@grocerystore.com');
         console.log('Password: admin123');
 
         process.exit(0);
