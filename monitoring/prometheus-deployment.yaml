@@ -45,7 +45,7 @@ data:
             action: keep
           - source_labels: [__meta_kubernetes_pod_ip]
             target_label: __address__
-            replacement: $1:80
+            replacement: $1:9113
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -104,7 +104,8 @@ spec:
   - protocol: TCP
     port: 9090
     targetPort: 9090
-  type: LoadBalancer
+    nodePort: 32090
+  type: NodePort
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
