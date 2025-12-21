@@ -12,6 +12,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Temporary Debug Interceptor (Log every request)
+app.use((req, res, next) => {
+    console.log(`🔍 INCOMING REQUEST: ${req.method} ${req.originalUrl}`);
+    next();
+});
+
 // Metrics Configuration
 const collectDefaultMetrics = client.collectDefaultMetrics;
 collectDefaultMetrics({ register: client.register });
