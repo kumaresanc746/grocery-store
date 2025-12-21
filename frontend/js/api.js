@@ -62,6 +62,9 @@ async function apiRequest(endpoint, options = {}) {
 
 async function adminApiRequest(endpoint, options = {}) {
     const token = getAdminToken();
+    const url = `${API_BASE_URL}${endpoint}`;
+    console.log(`🔒 Admin API Request: ${options.method || 'GET'} ${url}`);
+
     const defaultHeaders = {
         'Content-Type': 'application/json',
     };
@@ -79,20 +82,27 @@ async function adminApiRequest(endpoint, options = {}) {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-        const data = await response.json();
+        const response = await fetch(url, config);
+        console.log(`🛡️ Admin API Response: ${response.status} ${url}`);
+
+        // Handle non-JSON responses gracefully
+        let data = {};
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        }
 
         if (!response.ok && response.status === 401) {
             localStorage.removeItem('adminToken');
             localStorage.removeItem('admin');
-            window.location.href = 'admin-login.html';
+            if (!window.location.pathname.includes('admin-login')) {
+                window.location.href = 'admin-login.html';
+            }
         }
 
         return { response, data };
     } catch (error) {
-        console.error('Admin API Error:', error);
+        console.error(`❌ Admin API Network Error: ${url}`, error);
         throw error;
     }
 }
-
-
