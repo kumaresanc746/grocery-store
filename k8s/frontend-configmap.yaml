@@ -5,12 +5,5 @@ metadata:
   namespace: grocery-store
 data:
   config.js: |
-    // Smart API Configuration
-    (function() {
-      const { hostname, port, protocol } = window.location;
-      // ONLY set a global URL if we are on the Ingress port (80)
-      // If we are on NodePort (31581), api.js will handle the hop to 30001
-      if (port !== '31581') {
-        window.BACKEND_URL = protocol + '//' + window.location.host + '/api';
-      }
-    })();
+    // Configuration will be handled by relative paths and Nginx proxy
+    // No manual overrides needed.
