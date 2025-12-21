@@ -16,6 +16,7 @@ spec:
       containers:
       - name: frontend
         image: kumaresan05/grocery-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         volumeMounts:
@@ -36,6 +37,7 @@ spec:
           periodSeconds: 5
       - name: nginx-exporter
         image: nginx/nginx-prometheus-exporter:latest
+        imagePullPolicy: Always
         args:
           - -nginx.scrape-uri=http://localhost:80/nginx_status
         ports:
