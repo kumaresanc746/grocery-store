@@ -1,23 +1,7 @@
-// API Configuration: Smart detection for Ingress vs direct NodePort access
-const getApiBaseUrl = () => {
-    const { hostname, port, protocol } = window.location;
-
-    // If we have a manually set BACKEND_URL, use it ONLY if it's healthy
-    if (window.BACKEND_URL && !window.BACKEND_URL.includes('31581')) {
-        return window.BACKEND_URL;
-    }
-
-    // Detect if we are accessing via the Frontend NodePort
-    if (port === '31581') {
-        return `${protocol}//${hostname}:30001/api`;
-    }
-
-    // Default to Ingress-friendly relative path or standard host/api
-    return `${protocol}//${window.location.host}/api`;
-};
-
-const API_BASE_URL = getApiBaseUrl();
-console.log('🚀 GroceryMart API Path:', API_BASE_URL);
+// API Configuration: Using relative path to hit the Nginx Proxy
+// Nginx is configured to proxy all /api requests to http://backend:3000/api
+const API_BASE_URL = '/api';
+console.log('🚀 GroceryMart Proxy Mode Active:', API_BASE_URL);
 // Helper function to get auth token
 function getAuthToken() {
     return localStorage.getItem('token');
