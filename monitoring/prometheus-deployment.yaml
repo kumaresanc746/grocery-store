@@ -60,13 +60,50 @@ data:
       - job_name: 'prometheus'
         static_configs:
           - targets: ['localhost:9090']
-      
+
+      # Scrape the Kubelet (for node metrics)
+      - job_name: 'kubernetes-nodes'
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics
+
+      # Scrape cAdvisor (for pod resource metrics)
+      - job_name: 'kubernetes-cadvisor'
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+      # Application Scrapes
       - job_name: 'backend'
         kubernetes_sd_configs:
           - role: pod
             namespaces:
-              names:
-                - grocery-store
+              names: [grocery-store]
         relabel_configs:
           - source_labels: [__meta_kubernetes_pod_label_app]
             regex: backend
@@ -74,13 +111,14 @@ data:
           - source_labels: [__meta_kubernetes_pod_ip]
             target_label: __address__
             replacement: $1:3000
-      
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod_name
+
       - job_name: 'frontend'
         kubernetes_sd_configs:
           - role: pod
             namespaces:
-              names:
-                - grocery-store
+              names: [grocery-store]
         relabel_configs:
           - source_labels: [__meta_kubernetes_pod_label_app]
             regex: frontend
@@ -88,6 +126,8 @@ data:
           - source_labels: [__meta_kubernetes_pod_ip]
             target_label: __address__
             replacement: $1:9113
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod_name
 
   alert_rules.yml: |
     groups:
