@@ -14,6 +14,9 @@ function getAdminToken() {
 // API Helper Functions
 async function apiRequest(endpoint, options = {}) {
     const token = getAuthToken();
+    const url = `${API_BASE_URL}${endpoint}`;
+    console.log(`🌐 API Request: ${options.method || 'GET'} ${url}`);
+
     const defaultHeaders = {
         'Content-Type': 'application/json',
     };
@@ -31,8 +34,15 @@ async function apiRequest(endpoint, options = {}) {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-        const data = await response.json();
+        const response = await fetch(url, config);
+        console.log(`📡 API Response: ${response.status} ${url}`);
+
+        // Handle non-JSON responses gracefully
+        let data = {};
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        }
 
         if (!response.ok && response.status === 401) {
             // Unauthorized - clear token and redirect to login
@@ -45,7 +55,7 @@ async function apiRequest(endpoint, options = {}) {
 
         return { response, data };
     } catch (error) {
-        console.error('API Error:', error);
+        console.error(`❌ API Network Error: ${url}`, error);
         throw error;
     }
 }

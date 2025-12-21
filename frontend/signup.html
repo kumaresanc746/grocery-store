@@ -47,9 +47,9 @@
         </div>
     </div>
 
-    <script src="js/config.js?v=FIX"></script>
-    <script src="js/auth.js?v=FIX"></script>
-    <script src="js/api.js?v=FIX"></script>
+    <script src="js/config.js?v=FINAL_FIX"></script>
+    <script src="js/auth.js?v=FINAL_FIX"></script>
+    <script src="js/api.js?v=FINAL_FIX"></script>
     <script>
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -57,8 +57,10 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const address = document.getElementById('address').value;
+            const errorEl = document.getElementById('error-message');
 
             try {
+                errorEl.textContent = 'Connecting...';
                 const { response, data } = await apiRequest('/signup', {
                     method: 'POST',
                     body: JSON.stringify({ name, email, password, address })
@@ -68,11 +70,11 @@
                     alert('Sign up successful! Please login.');
                     window.location.href = 'login.html';
                 } else {
-                    document.getElementById('error-message').textContent = data.message || 'Sign up failed';
+                    errorEl.textContent = data.message || 'Sign up failed';
                 }
             } catch (error) {
                 console.error('Signup Error:', error);
-                document.getElementById('error-message').textContent = 'Unable to connect to server. Please try again later.';
+                errorEl.innerHTML = `<b>Connection Error</b><br><small>Failed to reach: ${API_BASE_URL}/signup</small>`;
             }
         });
     </script>
