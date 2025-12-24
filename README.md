@@ -2,22 +2,6 @@
 
 A full-stack grocery e-commerce application with complete DevOps pipeline including Docker, Kubernetes, Jenkins CI/CD, Terraform, Ansible, and Prometheus/Grafana monitoring.
 
-## 📋 Table of Contents
-
-- [Project Overview](#project-overview)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Detailed Setup Instructions](#detailed-setup-instructions)
-- [API Documentation](#api-documentation)
-- [Deployment](#deployment)
-- [Monitoring](#monitoring)
-- [Troubleshooting](#troubleshooting)
-
-## 🎯 Project Overview
-
 This project is a complete grocery e-commerce platform with:
 
 - **Frontend**: HTML, CSS, JavaScript (responsive design similar to Zepto/Blinkit)
@@ -26,11 +10,9 @@ This project is a complete grocery e-commerce platform with:
 - **Containerization**: Docker & Docker Compose
 - **Orchestration**: Kubernetes (EKS)
 - **CI/CD**: Jenkins Pipeline
-- **Infrastructure**: Terraform (AWS EC2, EKS, VPC)
-- **Configuration Management**: Ansible
 - **Monitoring**: Prometheus + Grafana
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -41,7 +23,7 @@ This project is a complete grocery e-commerce platform with:
        └───────────────────┴───────────────────┘
                            │
               ┌────────────┴────────────┐
-              │   Kubernetes (EKS)      │
+              │   Kubernetes (k8s)      │
               └────────────┬────────────┘
                            │
         ┌──────────────────┴──────────────────┐
@@ -52,7 +34,7 @@ This project is a complete grocery e-commerce platform with:
   └─────────────┘                      └─────────────┘
 ```
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 - HTML5
@@ -69,10 +51,7 @@ This project is a complete grocery e-commerce platform with:
 
 ### DevOps
 - Docker & Docker Compose
-- Kubernetes (EKS)
 - Jenkins
-- Terraform
-- Ansible
 - Prometheus
 - Grafana
 
@@ -124,9 +103,6 @@ grocery-store/
 │   ├── package.json
 │   └── Dockerfile
 │
-├── docker-compose.yml         # Docker Compose configuration
-├── mongo-init.js             # MongoDB initialization script
-│
 ├── k8s/                      # Kubernetes manifests
 │   ├── namespace.yaml
 │   ├── backend-deployment.yaml
@@ -142,17 +118,6 @@ grocery-store/
 │   ├── variables.tf
 │   ├── outputs.tf
 │   └── terraform.tfvars.example
-│
-├── ansible/                  # Ansible playbooks
-│   ├── playbooks/
-│   │   ├── install-docker.yml
-│   │   ├── install-jenkins.yml
-│   │   ├── deploy-docker-compose.yml
-│   │   ├── configure-kubernetes.yml
-│   │   └── copy-application-files.yml
-│   ├── inventory/
-│   │   └── hosts.ini
-│   └── ansible.cfg
 │
 ├── monitoring/               # Monitoring configuration
 │   ├── prometheus-deployment.yaml
@@ -792,38 +757,4 @@ kubectl apply -f monitoring/
 kubectl get all -n grocery-store
 ```
 
-## 📖 Additional Resources
-
-- [Docker Documentation](https://docs.docker.com/)
-- [Kubernetes Documentation](https://kubernetes.io/docs/)
-- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [Ansible Documentation](https://docs.ansible.com/)
-- [Prometheus Documentation](https://prometheus.io/docs/)
-- [Grafana Documentation](https://grafana.com/docs/)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👤 Author
-
-Created as a complete DevOps project demonstration.
-
----
-
-**Note**: This is a comprehensive project for learning purposes. In production, ensure:
-- Secure JWT secrets
-- Strong passwords
-- HTTPS/TLS encryption
-- Database backups
-- Monitoring and alerting
-- Security scanning
-- Proper access controls
 
